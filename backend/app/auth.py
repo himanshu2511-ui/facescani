@@ -1,3 +1,4 @@
+import os
 import datetime
 from typing import Optional
 from fastapi import Depends, HTTPException, status
@@ -9,13 +10,13 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import User
 
-# Configuration
-SECRET_KEY = "super_secret_glowup_coach_key_2026"  # In production, use env variables
+# Configuration — reads JWT_SECRET from environment (Render auto-generates it)
+SECRET_KEY = os.getenv("JWT_SECRET", "super_secret_glowup_coach_key_2026_dev_only")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 1 day
 
-# Hashing Context (avoiding bcrypt due to potential platform crash issues)
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+# Hashing Context — bcrypt is universally supported on all platforms
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 

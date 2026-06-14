@@ -2,7 +2,8 @@ fastapi>=0.110.0
 uvicorn>=0.29.0
 sqlalchemy>=2.0.0
 pydantic>=2.0
-passlib[argon2]
+passlib[bcrypt]
+bcrypt
 pyjwt
 # MediaPipe 0.10.21 is the last version with the stable mp.solutions.face_mesh API
 mediapipe==0.10.21
