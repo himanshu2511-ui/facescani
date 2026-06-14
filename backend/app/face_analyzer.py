@@ -9,13 +9,15 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 # Try importing MediaPipe, support fallback if missing/failed on headless environments
+# Catch both ImportError (not installed) and AttributeError (newer MediaPipe removed mp.solutions)
 try:
     import mediapipe as mp
     mp_face_mesh = mp.solutions.face_mesh
     MEDIA_PIPE_AVAILABLE = True
-except ImportError:
+except (ImportError, AttributeError) as e:
     MEDIA_PIPE_AVAILABLE = False
-    logger.warning("MediaPipe is not installed. FaceAnalyzer will use simulated analysis.")
+    mp_face_mesh = None
+    logger.warning(f"MediaPipe face_mesh unavailable ({e}). FaceAnalyzer will use simulated analysis.")
 
 @dataclass
 class Point3D:
