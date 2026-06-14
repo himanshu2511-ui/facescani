@@ -40,12 +40,22 @@ if DATABASE_URL:
 
 SQLALCHEMY_DATABASE_URL = DATABASE_URL or f"sqlite:///{os.path.join(DB_DIR, 'glowup.db')}"
 
-# PostgreSQL needs different connect args than SQLite
-connect_args = {"check_same_thread": False} if SQLALCHEMY_DATABASE_URL.startswith("sqlite") else {}
+is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args=connect_args
-)
+# SQLite needs check_same_thread; Postgres (especially Supabase pooler) needs
+# pool_pre_ping for connection health, and prepared-statement mode disabled
+# because Supabase transaction-pooler (port 6543, IPv4) does not support them.
+connect_args = {"check_same_thread": False} if is_sqlite else {}
+
+engine_kwargs = dict(connect_args=connect_args)
+
+if not is_sqlite:
+    engine_kwargs.update(
+        pool_pre_ping=True,          # Drop dead connections before reuse
+        pool_recycle=300,            # Recycle connections every 5 min
+    )
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
