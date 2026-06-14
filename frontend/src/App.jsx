@@ -5,7 +5,7 @@ import ScanPage from './components/ScanPage';
 import RoadmapPage from './components/RoadmapPage';
 import LeaderboardPage from './components/LeaderboardPage';
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const BACKEND_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
 
 export default function App() {
   const [token, setToken] = useState(localStorage.getItem('glowup_token'));

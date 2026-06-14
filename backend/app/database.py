@@ -46,10 +46,14 @@ if DATABASE_URL:
                             "(e.g. [YOUR-PASSWORD]). Replace it with your actual Supabase password."
                         )
 
-                    # Unquote first (prevent double-encoding), then safely encode
-                    encoded_password = urllib.parse.quote(
-                        urllib.parse.unquote(password), safe=""
-                    )
+                    # Unquote recursively (prevent double-encoding), then safely encode
+                    temp_pwd = password
+                    while "%" in temp_pwd:
+                        unquoted = urllib.parse.unquote(temp_pwd)
+                        if unquoted == temp_pwd:
+                            break
+                        temp_pwd = unquoted
+                    encoded_password = urllib.parse.quote(temp_pwd, safe="")
                     DATABASE_URL = f"{prefix}://{username}:{encoded_password}@{host_part}"
     except Exception as e:
         print(f"⚠️  Warning: Could not auto-encode DATABASE_URL password: {e}")

@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import { LogIn, UserPlus, Key, User as UserIcon, Sparkles } from 'lucide-react';
 
+// Centralized backend URL helper — strips trailing slashes
+function getBackendUrl() {
+  const raw = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const url = raw.replace(/\/+$/, ''); // strip trailing slashes
+  return url;
+}
+
 export default function AuthPage({ onAuthSuccess }) {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
@@ -15,7 +22,8 @@ export default function AuthPage({ onAuthSuccess }) {
     setLoading(true);
 
     const endpoint = isLogin ? '/auth/login' : '/auth/register';
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const backendUrl = getBackendUrl();
+    const fullUrl = `${backendUrl}${endpoint}`;
 
     try {
       let response;
@@ -25,7 +33,7 @@ export default function AuthPage({ onAuthSuccess }) {
         formData.append('username', username);
         formData.append('password', password);
 
-        response = await fetch(`${backendUrl}${endpoint}`, {
+        response = await fetch(fullUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -34,7 +42,7 @@ export default function AuthPage({ onAuthSuccess }) {
         });
       } else {
         // Register JSON Payload
-        response = await fetch(`${backendUrl}${endpoint}`, {
+        response = await fetch(fullUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -43,10 +51,19 @@ export default function AuthPage({ onAuthSuccess }) {
         });
       }
 
+      // Handle non-JSON error responses (e.g. HTML 404 pages)
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error(
+          `Server returned ${response.status}. Backend may be unreachable. ` +
+          `Check VITE_API_URL setting. Tried: ${fullUrl}`
+        );
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || 'Authentication failed');
+        throw new Error(data.detail || `Server error: ${response.status}`);
       }
 
       localStorage.setItem('glowup_token', data.access_token);
@@ -61,7 +78,14 @@ export default function AuthPage({ onAuthSuccess }) {
       
       onAuthSuccess(userData, data.access_token);
     } catch (err) {
-      setError(err.message);
+      console.error('[AuthPage] Error:', err);
+      if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+        setError(
+          `Cannot reach backend server. Please verify VITE_API_URL is set correctly. Tried: ${fullUrl}`
+        );
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -83,7 +107,7 @@ export default function AuthPage({ onAuthSuccess }) {
         </div>
 
         {error && (
-          <div className="alert-warning" style={{ border: '1px solid rgba(255, 62, 181, 0.3)', color: 'var(--accent-pink)', background: 'rgba(255, 62, 181, 0.08)', marginBottom: '20px', padding: '12px', borderRadius: '8px', fontSize: '0.85rem' }}>
+          <div className="alert-warning" style={{ border: '1px solid rgba(255, 62, 181, 0.3)', color: 'var(--accent-pink)', background: 'rgba(255, 62, 181, 0.08)', marginBottom: '20px', padding: '12px', borderRadius: '8px', fontSize: '0.85rem', wordBreak: 'break-word' }}>
             {error}
           </div>
         )}
@@ -101,6 +125,8 @@ export default function AuthPage({ onAuthSuccess }) {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                minLength={3}
+                maxLength={20}
               />
             </div>
           </div>
@@ -117,6 +143,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={6}
               />
             </div>
           </div>

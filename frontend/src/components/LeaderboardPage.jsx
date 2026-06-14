@@ -8,7 +8,7 @@ export default function LeaderboardPage({ onSelectUserScore }) {
   const [error, setError] = useState('');
 
   const fetchLeaderboard = async () => {
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const backendUrl = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/+$/, '');
     setLoading(true);
     setError('');
     try {
