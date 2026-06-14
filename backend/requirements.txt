@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic>=2.0
+passlib[argon2]
+pyjwt
+mediapipe
+opencv-python-headless
+numpy
+python-multipart
+websockets
+psycopg2-binary
