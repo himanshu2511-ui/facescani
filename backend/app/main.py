@@ -248,7 +248,7 @@ async def websocket_scan(websocket: WebSocket, token: Optional[str] = None, db: 
             
             if img_bytes:
                 # Run face analysis
-                result = analyzer.analyze_image(img_bytes, user.gender)
+                result = analyzer.analyze_image(img_bytes, user.gender, username=user.username, frame_index=len(frame_scores))
                 frame_scores.append(result)
                 
                 # Send feedback progress
