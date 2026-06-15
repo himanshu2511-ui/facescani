@@ -22,6 +22,30 @@ logger = logging.getLogger(__name__)
 # Create Tables
 Base.metadata.create_all(bind=engine)
 
+# Run migrations/fixes for PostgreSQL (Supabase)
+if not engine.url.drivername.startswith("sqlite"):
+    from sqlalchemy import text
+    try:
+        with engine.begin() as conn:
+            # Enable RLS on scores table
+            conn.execute(text("ALTER TABLE IF EXISTS scores ENABLE ROW LEVEL SECURITY;"))
+            
+            # Create a permissive policy for public.scores if it doesn't exist
+            conn.execute(text('DROP POLICY IF EXISTS "Allow all for service role" ON scores;'))
+            conn.execute(text('CREATE POLICY "Allow all for service role" ON scores FOR ALL USING (true) WITH CHECK (true);'))
+            
+            # Same for users table
+            conn.execute(text("ALTER TABLE IF EXISTS users ENABLE ROW LEVEL SECURITY;"))
+            conn.execute(text('DROP POLICY IF EXISTS "Allow all for service role" ON users;'))
+            conn.execute(text('CREATE POLICY "Allow all for service role" ON users FOR ALL USING (true) WITH CHECK (true);'))
+
+            # Create covering index on scores(user_id)
+            conn.execute(text("CREATE INDEX IF NOT EXISTS idx_scores_user_id ON scores(user_id);"))
+            logger.info("Successfully executed DB security policy and performance index updates.")
+    except Exception as e:
+        logger.error(f"Failed to run database migrations/fixes: {e}")
+
+
 app = FastAPI(title="AI Glowup Coach API", version="1.0.0")
 
 # Setup CORS

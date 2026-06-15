@@ -18,16 +18,15 @@ export default function ScanPage({ token, user, onScanComplete }) {
 
   // Initialize camera stream
   useEffect(() => {
+    let activeStream = null;
     async function startCamera() {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: { width: 640, height: 480, facingMode: 'user' },
           audio: false
         });
+        activeStream = mediaStream;
         setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
       } catch (err) {
         setError('Camera access denied or unavailable. Please enable permissions.');
       }
@@ -36,12 +35,20 @@ export default function ScanPage({ token, user, onScanComplete }) {
 
     return () => {
       // Cleanup camera stream
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
       }
       stopScan();
     };
   }, []);
+
+  // Bind stream to video element when it mounts / state changes
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
+
 
   const startScan = () => {
     if (!stream) {
