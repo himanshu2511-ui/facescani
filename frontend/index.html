@@ -9,6 +9,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- MediaPipe loaded from CDN to avoid WASM bundling issues with Vite -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
