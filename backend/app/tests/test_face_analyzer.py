@@ -23,18 +23,26 @@ def test_face_analyzer_fallback():
     assert res["total_score"] < res["potential_score"]
     
     # Check details keys
-    for k in ["Symmetry", "Golden_Ratio", "Eyes", "Lips", "Jawline", "Nose", "Harmony"]:
+    new_keys = [
+        "Symmetry", "Golden Ratio", "Harmony", "Eye Aesthetics", 
+        "Eyebrow Shape", "Nose Aesthetics", "Lip Aesthetics", 
+        "Jawline", "Cheekbones", "Face Shape"
+    ]
+    for k in new_keys:
         assert k in res["details"]
 
 def test_guidance_generator():
     scores = {
         "Symmetry": 75.0,
-        "Golden_Ratio": 70.0,
-        "Eyes": 65.0,
-        "Lips": 80.0,
+        "Golden Ratio": 70.0,
+        "Harmony": 72.0,
+        "Eye Aesthetics": 65.0,
+        "Eyebrow Shape": 68.0,
+        "Nose Aesthetics": 85.0,
+        "Lip Aesthetics": 80.0,
         "Jawline": 60.0,
-        "Nose": 85.0,
-        "Harmony": 72.0
+        "Cheekbones": 70.0,
+        "Face Shape": 74.0
     }
     roadmap = GuidanceGenerator.generate_roadmap(scores, gender="male")
     assert "disclaimer" in roadmap

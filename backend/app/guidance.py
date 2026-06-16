@@ -18,8 +18,8 @@ class GuidanceGenerator:
         Generates a custom 4-week roadmap combining the user's specific weekly focus actions 
         with a fully populated 28-day interactive checklist.
         """
-        # Exclude Harmony and Golden_Ratio from feature calculation to isolate weak features
-        feature_scores = {k: v for k, v in scores.items() if k not in ["Harmony", "Golden_Ratio"]}
+        # Exclude Harmony and Golden Ratio from feature calculation to isolate weak features
+        feature_scores = {k: v for k, v in scores.items() if k not in ["Harmony", "Golden Ratio"]}
         sorted_features = sorted(feature_scores.items(), key=lambda item: item[1])
         
         weak_features = [feature for feature, val in scores.items() if val < 70]

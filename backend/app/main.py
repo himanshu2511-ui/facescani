@@ -285,7 +285,7 @@ async def websocket_scan(websocket: WebSocket, token: Optional[str] = None, db: 
     # Aggregate results if frames were received
     if frame_scores:
         # Calculate average of details
-        keys = ["Symmetry", "Golden_Ratio", "Eyes", "Lips", "Jawline", "Nose", "Harmony"]
+        keys = ["Symmetry", "Golden Ratio", "Harmony", "Eye Aesthetics", "Eyebrow Shape", "Nose Aesthetics", "Lip Aesthetics", "Jawline", "Cheekbones", "Face Shape"]
         agg_details = {}
         for key in keys:
             vals = [f["details"][key] for f in frame_scores if "details" in f and key in f["details"]]
